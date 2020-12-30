@@ -1,5 +1,7 @@
 let key = '';
 let newText = '';
+let regExp = null;
+let keyLength = 0;
 
 const spanBefore = "<span class='highlight'>";
 const spanAfter = "</span>";
@@ -11,34 +13,47 @@ const searchResultList = document.getElementById('search-list');
 searchButton.addEventListener('click', function() {
     let userKeyword = seacrhInput.value;
     sessionStorage.setItem('keyword', userKeyword);
+
+    if(searchResultList) {
+      const titles = document.querySelectorAll('.title');
+      titles.forEach(function(title) {
+          key = sessionStorage.getItem('keyword');
+          keyLength = key.length;
+          regExp = new RegExp(key, 'i');  
+          
+          let titleText = title.textContent;   
+         //  textLength = titleText.length; 
+        
+          const newTotalText = syntaxHandler(titleText);
+          title.innerHTML = newTotalText;
+          newText = '';
+      })
+  }
 });
-
-if(searchResultList) {
-    const titles = document.querySelectorAll('.title');
-    titles.forEach(function(title) {
-        key = sessionStorage.getItem('keyword');
-        const regExp = new RegExp(key, 'i');
-        let titleText = title.textContent;    
-        const newTotalText = syntaxHandler(titleText, regExp);
-        title.innerHTML = newTotalText;
-    })
-}
+let count = 0;
 
 
-function syntaxHandler(text, regExp) {
+function syntaxHandler(text) {
+   if(count > 10) return;
+   count++;
+
   if(text.match(regExp) === null) {
   	return newText + text;
   } 
 
   let originalKey = text.match(regExp)[0];
   let firstIdx = text.match(regExp).index;
-  let lastIdx = firstIdx + text.length;
+  let lastIdx = firstIdx + keyLength;
 
   let pieceOfText = text.substring(0, lastIdx);
-  let highlightedPieceOfText = pieceOfText.substring(0, firstIdx) 
-  + spanBefore + originalKey + spanAfter;
+  //console.log(pieceOfText);
+  let highlightedPieceOfText = pieceOfText.substring(0, firstIdx) + spanBefore + originalKey + spanAfter;
+
   
   newText += highlightedPieceOfText;
+  console.log(text);
   let remainingText = text.substring(lastIdx, text.length);
+  console.log(remainingText);
+
   return syntaxHandler(remainingText);
 }
