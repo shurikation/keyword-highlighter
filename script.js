@@ -3,8 +3,8 @@ let newText = '';
 let regExp = null;
 let keyLength = 0;
 
-const spanBefore = "<span class='highlight'>";
-const spanAfter = "</span>";
+const tagBefore = "<span class='highlight'>";
+const tagAfter = "</span>";
 
 const seacrhInput = document.getElementById('field');
 const searchButton = document.getElementById('find');
@@ -16,27 +16,25 @@ searchButton.addEventListener('click', function() {
 
     if(searchResultList) {
       const titles = document.querySelectorAll('.title');
-      titles.forEach(function(title) {
-          key = sessionStorage.getItem('keyword');
-          keyLength = key.length;
-          regExp = new RegExp(key, 'i');  
-          
-          let titleText = title.textContent;   
-         //  textLength = titleText.length; 
-        
-          const newTotalText = syntaxHandler(titleText);
-          title.innerHTML = newTotalText;
-          newText = '';
-      })
+      const descriptions = document.querySelectorAll('.description');
+      textHandler(titles);
+      textHandler(descriptions);
   }
 });
-let count = 0;
 
+function textHandler(elems) {
+  elems.forEach(function(elem) {
+    key = sessionStorage.getItem('keyword');
+    keyLength = key.length;
+    regExp = new RegExp(key, 'i');           
+    let elemText = elem.textContent;         
+    const highlightedText = getHighlightedText(elemText);
+    elem.innerHTML = highlightedText;
+    newText = '';
+  });
+}
 
-function syntaxHandler(text) {
-   if(count > 10) return;
-   count++;
-
+function getHighlightedText(text) {
   if(text.match(regExp) === null) {
   	return newText + text;
   } 
@@ -44,16 +42,13 @@ function syntaxHandler(text) {
   let originalKey = text.match(regExp)[0];
   let firstIdx = text.match(regExp).index;
   let lastIdx = firstIdx + keyLength;
-
   let pieceOfText = text.substring(0, lastIdx);
-  //console.log(pieceOfText);
-  let highlightedPieceOfText = pieceOfText.substring(0, firstIdx) + spanBefore + originalKey + spanAfter;
+  let highlightedPieceOfText = pieceOfText.substring(0, firstIdx) + tagBefore + originalKey + tagAfter;
 
-  
   newText += highlightedPieceOfText;
   console.log(text);
   let remainingText = text.substring(lastIdx, text.length);
   console.log(remainingText);
 
-  return syntaxHandler(remainingText);
+  return getHighlightedText(remainingText);
 }
