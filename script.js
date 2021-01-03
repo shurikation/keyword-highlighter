@@ -1,10 +1,9 @@
 let key = '';
-let newText = '';
 let regExp = null;
 let keyLength = 0;
 
-const tagBefore = "<span class='highlight'>";
-const tagAfter = "</span>";
+const tagBefore = '<span class="highlight">';
+const tagAfter = '</span>';
 
 const seacrhInput = document.getElementById('field');
 const searchButton = document.getElementById('find');
@@ -22,6 +21,10 @@ searchButton.addEventListener('click', function() {
   }
 });
 
+/**
+ * Handle a keyword, the element and adds highlighted text to the element
+ * @param {objects} elems - DOM elements with text 
+ */
 function textHandler(elems) {
   elems.forEach(function(elem) {
     key = sessionStorage.getItem('keyword');
@@ -30,25 +33,27 @@ function textHandler(elems) {
     let elemText = elem.textContent;         
     const highlightedText = getHighlightedText(elemText);
     elem.innerHTML = highlightedText;
-    newText = '';
   });
 }
 
-function getHighlightedText(text) {
-  if(text.match(regExp) === null) {
-  	return newText + text;
-  } 
+/**
+ * Finds keywords and adds tags into the original text for highlighting keywords
+ * @param {string} text - original text from the DOM element
+ * @returns {string} - updated text with tags
+ */
+function getHighlightedText(text, highlightedText) {
+  highlightedText = highlightedText || '';
 
+  if(text.match(regExp) === null) return highlightedText + text;
+  
   let originalKey = text.match(regExp)[0];
   let firstIdx = text.match(regExp).index;
   let lastIdx = firstIdx + keyLength;
   let pieceOfText = text.substring(0, lastIdx);
   let highlightedPieceOfText = pieceOfText.substring(0, firstIdx) + tagBefore + originalKey + tagAfter;
 
-  newText += highlightedPieceOfText;
-  console.log(text);
+  highlightedText += highlightedPieceOfText;
   let remainingText = text.substring(lastIdx, text.length);
-  console.log(remainingText);
 
-  return getHighlightedText(remainingText);
+  return getHighlightedText(remainingText, highlightedText);
 }
